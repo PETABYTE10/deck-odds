@@ -1,0 +1,357 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101b31">
+  <meta name="description" content="遊戯王の初手確率と、初動札・事故札のバランスからデッキ枚数を比較できる無料計算ツール。">
+  <title>DECK ODDS | 遊戯王 デッキ確率計算機</title>
+  <style>
+    :root{color-scheme:light;--ink:#16243b;--muted:#64738a;--bg:#f3f6fb;--surface:#fff;--edge:#e0e8f1;--deep:#111e35;--primary:#196dce;--aqua:#19c4ab;--coral:#eb6777;--radius:20px;--shadow:0 12px 36px rgba(22,38,65,.055)}
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,"Hiragino Kaku Gothic ProN","Hiragino Sans",Meiryo,system-ui,sans-serif;font-size:15px;line-height:1.65}
+    button,input{font:inherit}
+    button{cursor:pointer}button:focus-visible,input:focus-visible,a:focus-visible{outline:3px solid #88baff;outline-offset:3px}
+    button:disabled{cursor:not-allowed;opacity:.5}
+    .topbar{background:var(--deep);color:white;border-bottom:1px solid #334058}
+    .wrap{width:min(1120px,calc(100% - 40px));margin-inline:auto}
+    .topinner{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:19px 0}
+    .brand{display:flex;align-items:center;gap:11px;font-weight:850;letter-spacing:.05em;font-size:17px}
+    .brandmark{width:36px;height:36px;border:1px solid #4be7d4;border-radius:10px;color:#80f2e2;display:grid;place-items:center;background:#1a3245;font-size:19px;line-height:1}
+    .brand small{display:block;color:#aebcd4;font-size:10px;letter-spacing:.19em;line-height:1.2;margin-top:2px}
+    .headbutton{border:1px solid #48627d;background:#1b2c45;color:white;border-radius:11px;padding:9px 14px;font-size:12px;font-weight:700;transition:background .15s}
+    .headbutton:hover{background:#29415e}
+    .headbutton{white-space:nowrap}
+    .hero{background:radial-gradient(700px 290px at 83% -40%,rgba(12,216,190,.18),transparent),linear-gradient(135deg,#121f37,#1b2e4c 100%);color:white;padding:42px 0 92px}
+    .eyebrow{margin:0 0 10px;font-size:11px;font-weight:800;letter-spacing:.18em;color:#73e6d6;text-transform:uppercase}
+    .hero h1{font-size:clamp(27px,4.5vw,43px);letter-spacing:-.03em;line-height:1.3;margin:0 0 13px}
+    .hero p.lead{margin:0;max-width:740px;color:#c0cddd;font-size:14px;line-height:1.85}
+    .hero-tags{display:flex;gap:9px;flex-wrap:wrap;margin-top:19px}
+    .hero-tags span{font-size:11px;border:1px solid #496078;color:#bddbdc;border-radius:999px;padding:3px 10px}
+    main{margin-top:-49px;padding-bottom:60px;position:relative}
+    .tabs{display:flex;gap:5px;width:fit-content;padding:5px;border:1px solid var(--edge);background:white;border-radius:16px;box-shadow:var(--shadow);margin-bottom:21px;max-width:100%}
+    .tab{border:0;background:transparent;color:var(--muted);border-radius:12px;padding:12px 22px;font-size:13px;font-weight:800;white-space:nowrap}
+    .tab[aria-selected=true]{background:#1d3c62;color:#fff;box-shadow:0 3px 9px rgba(13,30,53,.17)}
+    .panel[hidden]{display:none}
+    .grid{display:grid;grid-template-columns:minmax(280px,360px) minmax(0,1fr);gap:20px;align-items:start}
+    .card{background:var(--surface);border:1px solid var(--edge);border-radius:var(--radius);box-shadow:var(--shadow);padding:25px;min-width:0}
+    .card h2,.card h3{margin:0;letter-spacing:-.025em;line-height:1.4}
+    .card h2{font-size:19px}.card h3{font-size:15px}
+    .sub{font-size:12px;color:var(--muted);margin:7px 0 0;line-height:1.75}
+    .control{padding:22px 0;border-bottom:1px solid #edf1f6}.control:last-child{border-bottom:0;padding-bottom:0}
+    .control label,.ctrl-title{font-size:12px;font-weight:800;color:#455670;display:block}
+    .ctrl-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+    .number{display:flex;align-items:center;gap:5px;justify-content:flex-end}
+    .number input{height:38px;width:67px;border:1px solid #cfdbea;border-radius:9px;background:#fafcfe;color:#1a314f;text-align:center;font-size:18px;font-weight:800;padding:0 4px;font-variant-numeric:tabular-nums;appearance:textfield}
+    .number input::-webkit-inner-spin-button,.number input::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+    .unit{font-size:12px;color:var(--muted);font-weight:700}
+    input[type=range]{appearance:none;-webkit-appearance:none;width:100%;height:6px;border-radius:99px;background:#dfebf7;accent-color:var(--primary);outline-offset:7px;cursor:pointer;display:block;margin:14px 0 11px}
+    input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;height:19px;width:19px;border-radius:50%;border:4px solid #fff;background:var(--primary);box-shadow:0 1px 7px #7a91aa}
+    input[type=range]::-moz-range-thumb{height:13px;width:13px;border-radius:50%;border:4px solid white;background:var(--primary);box-shadow:0 1px 7px #7a91aa}
+    .ends{display:flex;justify-content:space-between;color:#8a97a9;font-size:10px;font-weight:600}
+    .segments{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px}
+    .segments button{border:1px solid #d9e4f0;background:#f7f9fc;color:#52627a;border-radius:10px;padding:8px 12px;font-size:12px;font-weight:700;flex:1;white-space:nowrap;transition:.15s}
+    .segments button[aria-pressed=true]{background:#e8f3ff;border-color:#81b9f2;color:#155ba9}
+    .note{color:var(--muted);font-size:11px;line-height:1.7;margin:11px 0 0}
+    .summary{background:linear-gradient(120deg,#173452,#1d4861);border-radius:15px;color:white;padding:23px 24px;margin-bottom:17px;position:relative;overflow:hidden}
+    .summary::before{content:"";position:absolute;width:190px;height:190px;border:34px solid rgba(63,225,207,.09);border-radius:50%;right:-85px;top:-80px;pointer-events:none}
+    .summary .kicker{color:#b3d5de;font-size:11px;font-weight:750;letter-spacing:.06em;margin:0 0 7px}
+    .big{font-size:clamp(36px,5.5vw,53px);font-weight:850;letter-spacing:-.045em;line-height:1.1;font-variant-numeric:tabular-nums;margin:0;color:white}
+    .big span{font-size:22px;letter-spacing:0;padding-left:2px}
+    .summary .detail{font-size:12px;color:#d0e5ea;margin:13px 0 0;position:relative}
+    .kpis{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-bottom:18px}
+    .kpi{border:1px solid #e1eaf2;border-radius:13px;padding:15px 17px;min-width:0}
+    .kpi-label{font-size:11px;color:#66768c;font-weight:700}
+    .kpi strong{display:block;font-size:23px;letter-spacing:-.025em;line-height:1.4;margin-top:4px;font-variant-numeric:tabular-nums}
+    .kpi small{color:#738197;font-size:11px}
+    .section-heading{display:flex;align-items:start;justify-content:space-between;gap:12px;margin:22px 0 11px}
+    .section-heading h3{margin:0;font-size:15px}.section-heading p{margin:4px 0 0;font-size:11px;color:var(--muted)}
+    .dist{height:17px;overflow:hidden;border-radius:999px;display:flex;background:#eaf0f7;gap:2px}
+    .dist div{height:100%;transition:width .25s}
+    .legend{display:flex;gap:13px;flex-wrap:wrap;margin-top:12px}
+    .legend span{display:inline-flex;align-items:center;gap:6px;font-size:11px;color:#5c6980;white-space:nowrap}
+    .dot{display:inline-block;width:9px;height:9px;border-radius:3px;flex:0 0 auto}
+    .scrollbox{overflow-x:auto;border:1px solid var(--edge);border-radius:12px;margin-top:11px}
+    table{width:100%;border-collapse:collapse;font-size:12px;font-variant-numeric:tabular-nums;white-space:nowrap}
+    th{color:#62718a;background:#f6f9fc;font-size:11px;font-weight:800;text-align:right;padding:11px 12px}
+    th:first-child{text-align:left}
+    td{padding:11px 12px;border-top:1px solid #edf1f5;text-align:right}
+    td:first-child{text-align:left;font-weight:750}
+    tr.selected-row{background:#edf7ff}tr.selected-row td:first-child{color:#1361ae}
+    tr.best-row{background:#edfaf6}tr.best-row td:first-child{color:#097f70}
+    td strong{color:#106b61}
+    .subtle-pill{background:#e6f7f3;color:#087466;padding:3px 7px;font-size:10px;border-radius:20px;font-weight:800;white-space:nowrap}
+    .footnote{font-size:11px;color:#77859b;line-height:1.85;margin:13px 0 0}
+    .formula{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:12px;background:#f4f7fb;border:1px solid #e2eaf3;border-radius:11px;padding:12px 14px;white-space:normal;overflow-wrap:anywhere;color:#45546b;margin-top:15px}
+    .info{margin-top:20px;padding:21px 24px;border:1px solid #dce6f0;background:#f9fbfe;border-radius:16px}
+    .info h3{font-size:14px;margin:0 0 8px}.info p{font-size:12px;color:#67768c;line-height:1.9;margin:0}
+    .level-label{display:inline-flex;align-items:center;gap:8px;font-size:11px;font-weight:850;color:#46708c;margin-bottom:6px}
+    .mini-alert{margin-top:13px;border-left:3px solid #efb64c;padding:9px 11px;background:#fff8eb;font-size:11px;color:#765d31;border-radius:0 7px 7px 0;line-height:1.7}
+    .chart-wrap{background:#fafcff;border:1px solid #e7edf4;border-radius:13px;overflow:hidden;padding:10px 10px 6px}
+    .chart-wrap svg{display:block;width:100%;height:auto;overflow:visible}
+    .chart-top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:5px 0 11px}
+    .chart-top .muted{font-size:11px;color:var(--muted)}
+    .chart-legend{display:flex;align-items:center;gap:7px;font-size:11px;color:#52718a}
+    .status{position:fixed;bottom:20px;left:50%;transform:translate(-50%,18px);background:#173453;color:white;border-radius:12px;padding:11px 17px;box-shadow:0 10px 35px #1b334a35;opacity:0;pointer-events:none;transition:.2s;z-index:10;font-size:12px;max-width:calc(100% - 40px);text-align:center}
+    .status.show{opacity:1;transform:translate(-50%,0)}
+    footer{padding:21px 0 30px;text-align:center;color:#77879d;font-size:11px;border-top:1px solid #e1e8f2}
+    .footerlinks{margin-top:8px}
+    .footerlinks a{color:#3f73a7;text-underline-offset:3px}
+    @media(max-width:840px){.grid{grid-template-columns:1fr}.controls-card{order:0}.results-card{order:1}.card{padding:22px}}
+    @media(max-width:520px){.wrap{width:calc(100% - 28px)}.hero{padding:31px 0 87px}.hero h1{font-size:27px}.topinner{padding:14px 0}.brand{font-size:14px}.brandmark{width:33px;height:33px}.headbutton{font-size:11px;padding:8px 10px}.tabs{width:100%}.tab{flex:1;white-space:normal;padding:11px 7px;font-size:12px}.card{padding:18px;border-radius:16px}.grid{gap:14px}.big{font-size:42px}.kpi{padding:12px}.kpi strong{font-size:21px}.summary{padding:20px}.segments button{padding:8px 7px;font-size:11px}.info{padding:17px}.hero-tags{gap:6px}}
+    @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important}}
+  </style>
+</head>
+<body>
+<header class="topbar"><div class="wrap topinner">
+  <div class="brand"><span class="brandmark" aria-hidden="true">▦</span><div>DECK ODDS <small>YU-GI-OH! DECK CALCULATOR</small></div></div>
+  <button type="button" class="headbutton" id="shareButton" aria-label="現在の設定を含むURLをコピー">↗ 設定URLをコピー</button>
+</div></header>
+<section class="hero"><div class="wrap">
+  <p class="eyebrow">DECK BUILDING · PROBABILITY</p>
+  <h1>デッキの「引ける」と「引かない」を、数字で。</h1>
+  <p class="lead">初動札を引く確率、事故札を避ける確率。構築の感覚を数値で見比べられる計算ツールです。</p>
+  <div class="hero-tags"><span>40〜60枚対応</span><span>先攻5枚・後攻6枚</span><span>計算はすべて端末内</span></div>
+</div></section>
+<main class="wrap">
+  <div class="tabs" role="tablist" aria-label="計算モード">
+    <button class="tab" id="tab-quick" role="tab" aria-controls="panel-quick" aria-selected="true" tabindex="0" data-tab="quick">01　初手確率計算</button>
+    <button class="tab" id="tab-opt" role="tab" aria-controls="panel-opt" aria-selected="false" tabindex="-1" data-tab="opt">02　事故札・枚数最適化</button>
+  </div>
+  <section class="panel" id="panel-quick" role="tabpanel" aria-labelledby="tab-quick">
+    <div class="grid">
+      <div class="card controls-card">
+        <h2>確率を設定</h2><p class="sub">引きたいカードを1枚以上引ける確率を計算します。</p>
+        <div class="control"><div class="ctrl-head"><label for="quickDeck">デッキ総枚数</label><div class="number"><input id="quickDeckNum" type="number" min="40" max="60" value="40" aria-label="デッキ総枚数の数値入力"><span class="unit">枚</span></div></div><input id="quickDeck" type="range" min="40" max="60" value="40" aria-label="デッキ総枚数"><div class="ends"><span>40枚</span><span>60枚</span></div></div>
+        <div class="control"><div class="ctrl-head"><label for="quickTarget">引きたいカードの合計枚数</label><div class="number"><input id="quickTargetNum" type="number" min="1" max="30" value="3" aria-label="引きたいカードの合計枚数の数値入力"><span class="unit">枚</span></div></div><input id="quickTarget" type="range" min="1" max="30" value="3" aria-label="引きたいカードの合計枚数"><div class="ends"><span>1枚</span><span>30枚</span></div><p class="note">同名カードだけでなく、どれでも初動になる複数種類のカードを合算できます。</p></div>
+        <div class="control"><label class="ctrl-title">ドロー枚数</label><div class="segments" id="quickPhase"><button type="button" data-val="5" aria-pressed="true">先攻 5枚</button><button type="button" data-val="6" aria-pressed="false">後攻 6枚</button><button type="button" data-val="custom" aria-pressed="false">自由設定</button></div><div id="customDrawWrap" hidden style="margin-top:15px"><div class="ctrl-head"><label for="quickDraw">引く枚数</label><div class="number"><input id="quickDrawNum" type="number" min="1" max="15" value="7" aria-label="引く枚数の数値入力"><span class="unit">枚</span></div></div><input id="quickDraw" type="range" min="1" max="15" value="7" aria-label="引く枚数"></div></div>
+      </div>
+      <div class="card results-card">
+        <div class="summary"><p class="kicker">1枚以上引ける確率</p><p class="big" id="quickPrimary">33.76<span>%</span></p><p class="detail" id="quickDescription">40枚のデッキ / 対象3枚 / 初手5枚</p></div>
+        <div class="kpis"><div class="kpi"><div class="kpi-label">1枚も引けない</div><strong id="quickMiss">66.24%</strong><small>対象カード0枚</small></div><div class="kpi"><div class="kpi-label">ちょうど1枚引く</div><strong id="quickExactlyOne">30.11%</strong><small>対象カードが1枚</small></div></div>
+        <div class="section-heading"><div><h3>初手の内訳</h3><p>0枚 / 1枚 / 2枚 / 3枚以上の確率</p></div></div>
+        <div class="dist" role="img" id="quickDist" aria-label="引ける枚数ごとの確率"></div>
+        <div class="legend"><span><i class="dot" style="background:#c7d4e3"></i>0枚 <b id="leg0"></b></span><span><i class="dot" style="background:#2782d6"></i>1枚 <b id="leg1"></b></span><span><i class="dot" style="background:#28baaa"></i>2枚 <b id="leg2"></b></span><span><i class="dot" style="background:#8f70d6"></i>3枚以上 <b id="leg3"></b></span></div>
+        <div class="section-heading"><div><h3>デッキ枚数別・早見表</h3><p>対象カードを1・2・3枚入れた場合の「1枚以上」の確率</p></div></div>
+        <div class="scrollbox"><table><thead><tr><th>デッキ</th><th>1枚採用</th><th>2枚採用</th><th>3枚採用</th></tr></thead><tbody id="quickTable"></tbody></table></div>
+        <div class="formula">P(1枚以上) = 1 − C(N − K, h) / C(N, h)</div>
+        <p class="footnote">N＝デッキ枚数、K＝対象カード合計枚数、h＝引く枚数。サーチやドロー効果、マリガン等は含めない、無作為抽出の確率です。</p>
+      </div>
+    </div>
+  </section>
+  <section class="panel" id="panel-opt" role="tabpanel" aria-labelledby="tab-opt" hidden>
+    <div class="grid">
+      <div class="card controls-card">
+        <h2>構築条件を設定</h2><p class="sub">初動札・事故札の枚数を固定し、他のカードを足して40枚から増やした場合を比較します。</p>
+        <div class="control"><div class="ctrl-head"><label for="optStarter">初動札の合計枚数</label><div class="number"><input id="optStarterNum" type="number" min="1" max="30" value="15" aria-label="初動札合計枚数の数値入力"><span class="unit">枚</span></div></div><input id="optStarter" type="range" min="1" max="30" value="15" aria-label="初動札の合計枚数"><div class="ends"><span>1枚</span><span>30枚</span></div><p class="note">どの1枚を引いても初動が成立するカードの合計。</p></div>
+        <div class="control"><div class="ctrl-head"><label for="optBrick">事故札の合計枚数</label><div class="number"><input id="optBrickNum" type="number" min="1" max="6" value="3" aria-label="事故札合計枚数の数値入力"><span class="unit">枚</span></div></div><input id="optBrick" type="range" min="1" max="6" value="3" aria-label="事故札の合計枚数"><div class="ends"><span>1枚</span><span>6枚</span></div><p class="note">引きたくないカードの合計。異なるカードも合算可能です。</p></div>
+        <div class="control"><label class="ctrl-title">評価する手札</label><div class="segments" id="optPhase"><button type="button" data-val="5" aria-pressed="false">先攻 5枚</button><button type="button" data-val="6" aria-pressed="false">後攻 6枚</button><button type="button" data-val="avg" aria-pressed="true">先後平均</button></div><p class="note">先後平均は先攻と後攻の確率を50%ずつで評価します。</p></div>
+        <div class="control"><div class="ctrl-head"><label for="optResidual">事故札を引いた手札の残存評価</label><div class="number"><input id="optResidualNum" type="number" min="0" max="100" value="0" aria-label="事故札を引いた手札の残存評価"><span class="unit">%</span></div></div><input id="optResidual" type="range" min="0" max="100" step="5" value="0" aria-label="事故札を引いた手札の残存評価"><div class="ends"><span>0% 完全事故</span><span>100% 影響なし</span></div><p class="note">初動と事故札を同時に引いた場合の手札を、事故札なしの初動手札と比べて何%の価値で評価するかを指定します。</p></div>
+        <div class="control"><label class="ctrl-title">比較するデッキ枚数</label><div class="segments" id="optMax"><button type="button" data-val="45" aria-pressed="true">40〜45</button><button type="button" data-val="50" aria-pressed="false">40〜50</button><button type="button" data-val="60" aria-pressed="false">40〜60</button></div><p class="note">追加するカードは、初動札でも事故札でもない「その他のカード」と仮定します。</p></div>
+      </div>
+      <div class="card results-card">
+        <div class="summary"><p class="kicker">設定条件で評価スコア最大</p><p class="big" id="optBest">45<span>枚</span></p><p class="detail" id="optSummary">40枚構築と比較して +1.46pt</p></div>
+        <div class="kpis"><div class="kpi"><div class="kpi-label">最適構築の評価スコア</div><strong id="optScore">61.89%</strong><small id="optScoreDelta">40枚比 +1.46pt</small></div><div class="kpi"><div class="kpi-label">40枚構築の評価スコア</div><strong id="optBaseline">60.43%</strong><small>比較の基準値</small></div></div>
+        <div class="mini-alert" id="optNuance">数値上の差が小さい場合、実戦での優劣はほとんどありません。</div>
+        <div class="section-heading"><div><h3>デッキ枚数による評価スコアの変化</h3><p>縦軸は差を見やすくするため拡大しています</p></div></div>
+        <div class="chart-wrap"><div class="chart-top"><span class="muted" id="optChartRange">40〜45枚</span><span class="chart-legend"><i class="dot" style="background:#18a997"></i>評価スコア</span></div><div id="optChart" role="img" aria-label="デッキ枚数に対する評価スコアの折れ線グラフ"></div></div>
+        <div class="section-heading"><div><h3>枚数別・詳細比較</h3><p>初動率・事故率・評価スコアは、それぞれ異なる指標です</p></div></div>
+        <div class="scrollbox"><table><thead><tr><th>枚数</th><th>初動率</th><th>事故率</th><th>初動あり・事故なし</th><th>評価スコア</th><th>40枚比</th></tr></thead><tbody id="optTable"></tbody></table></div>
+        <p class="footnote">初動率＝初動札を1枚以上引く確率。事故率＝事故札を1枚以上引く確率。評価スコア＝「初動あり・事故なし」の確率＋「初動あり・事故あり」の確率×残存評価率。これは勝率の予測ではありません。</p>
+        <div class="formula">P(初動あり・事故なし) = [C(N−B, h) − C(N−S−B, h)] / C(N, h)</div>
+      </div>
+    </div>
+  </section>
+  <div class="info"><h3>計算の前提と使い方</h3><p>デッキ内のカードは無作為にシャッフルされ、重複なしで引くものとして「超幾何分布」で計算しています。同名カードの3枚制限はありますが、複数種類の初動札・事故札はまとめて入力できます。最適化では初動札と事故札は重複せず、追加カードによって初動の成立条件や展開力が変化しないと仮定しています。2枚初動、サーチ、引いてはいけない組合せ、誘発・貫通札などは別途考慮してください。</p></div>
+</main>
+<footer><div class="wrap">DECK ODDS — 非公式・ファン制作の確率計算ツール。権利者とは関係ありません。<div class="footerlinks">外部ライブラリなし / データ送信なし / PC・スマートフォン対応</div></div></footer>
+<div class="status" id="toast" role="status" aria-live="polite"></div>
+<script>
+'use strict';
+(() => {
+  const $ = id => document.getElementById(id);
+  const clamp = (value,min,max) => Math.min(max,Math.max(min,value));
+  const toPct = (p,digits=2) => (p*100).toFixed(digits)+'%';
+  const toPt = (n,digits=2) => (n>=-1e-12?'+':'')+(n*100).toFixed(digits)+'pt';
+
+  // 対象K枚をh枚の手札で1枚も引かない確率（超幾何分布）。
+  function none(N,K,h) {
+    if (K<0 || N<1 || h<0 || h>N || K>N) return NaN;
+    if (h>N-K) return 0;
+    let p=1;
+    for(let i=0;i<h;i++) p *= (N-K-i)/(N-i);
+    return p;
+  }
+  function choose(n,k) {
+    if(k<0 || k>n || n<0) return 0;
+    k=Math.min(k,n-k);
+    let out=1;
+    for(let i=1;i<=k;i++) out=out*(n-k+i)/i;
+    return out;
+  }
+  function exactly(N,K,h,x) {
+    return choose(K,x)*choose(N-K,h-x)/choose(N,h);
+  }
+  function metrics(N,S,B,h,r=0) {
+    const start=1-none(N,S,h);
+    const brick=1-none(N,B,h);
+    const clean=none(N,B,h)-none(N,S+B,h);
+    const withBrick=start-clean;
+    return {start,brick,clean,withBrick,score:clean+r*withBrick};
+  }
+  function weightedMetrics(N,S,B,phase,r) {
+    if(phase!=='avg')return metrics(N,S,B,Number(phase),r);
+    const a=metrics(N,S,B,5,r),b=metrics(N,S,B,6,r);
+    return Object.fromEntries(Object.keys(a).map(k=>[k,(a[k]+b[k])/2]));
+  }
+
+  const state={tab:'quick',qd:40,qk:3,qphase:'5',qh:7,os:15,ob:3,ophase:'avg',or:0,omax:45};
+  function setPair(rangeId,numId,key,min,max) {
+    const rng=$(rangeId),num=$(numId);
+    const update=(v,force=false)=>{
+      if(v===''&&!force)return;
+      const parsed=Number(v);
+      if(!Number.isFinite(parsed))return;
+      state[key]=clamp(Math.round(parsed),min,max);
+      rng.value=state[key];num.value=state[key];
+      render();
+    };
+    rng.addEventListener('input',()=>update(rng.value,true));
+    num.addEventListener('input',()=>{if(num.value!==''&&Number.isFinite(Number(num.value)))update(num.value)});
+    num.addEventListener('blur',()=>{num.value=state[key]});
+  }
+  function segments(container,key,after) {
+    const buttons=[...$(container).querySelectorAll('button[data-val]')];
+    buttons.forEach(b=>b.addEventListener('click',()=>{
+      state[key]=b.dataset.val;
+      if(key==='omax')state[key]=Number(state[key]);
+      syncSegments(container,key);
+      if(after)after();
+      render();
+    }));
+  }
+  function syncSegments(container,key) {
+    $(container).querySelectorAll('button[data-val]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.val===String(state[key]))));
+  }
+  function selectTab(value) {
+    state.tab=value==='opt'?'opt':'quick';
+    for(const v of ['quick','opt']){
+      const active=v===state.tab;
+      $('tab-'+v).setAttribute('aria-selected',String(active));
+      $('tab-'+v).tabIndex=active?0:-1;
+      $('panel-'+v).hidden=!active;
+    }
+    render();
+  }
+  document.querySelectorAll('[data-tab]').forEach(b=>b.addEventListener('click',()=>selectTab(b.dataset.tab)));
+  document.querySelector('.tabs').addEventListener('keydown',event=>{
+    if(event.key!=='ArrowRight'&&event.key!=='ArrowLeft')return;
+    event.preventDefault();const next=state.tab==='quick'?'opt':'quick';selectTab(next);$('tab-'+next).focus();
+  });
+
+  setPair('quickDeck','quickDeckNum','qd',40,60);
+  setPair('quickTarget','quickTargetNum','qk',1,30);
+  setPair('quickDraw','quickDrawNum','qh',1,15);
+  setPair('optStarter','optStarterNum','os',1,30);
+  setPair('optBrick','optBrickNum','ob',1,6);
+  setPair('optResidual','optResidualNum','or',0,100);
+  segments('quickPhase','qphase',()=>{ $('customDrawWrap').hidden=state.qphase!=='custom'; });
+  segments('optPhase','ophase');segments('optMax','omax');
+
+  function renderQuick() {
+    const {qd:N,qk:K}=state;
+    const h=state.qphase==='custom'?state.qh:Number(state.qphase);
+    const p=1-none(N,K,h),p0=none(N,K,h),p1=exactly(N,K,h,1),p2=exactly(N,K,h,2),p3=clamp(1-p0-p1-p2,0,1);
+    $('quickPrimary').innerHTML=(p*100).toFixed(2)+'<span>%</span>';
+    $('quickDescription').textContent=`${N}枚デッキ / 対象${K}枚 / ${h}枚ドロー`;
+    $('quickMiss').textContent=toPct(p0);$('quickExactlyOne').textContent=toPct(p1);
+    const data=[p0,p1,p2,p3],colors=['#c7d4e3','#2782d6','#28baaa','#8f70d6'];
+    $('quickDist').innerHTML=data.map((v,i)=>`<div title="${['0枚','1枚','2枚','3枚以上'][i]}: ${toPct(v)}" style="width:${Math.max(0,v*100)}%;background:${colors[i]}"></div>`).join('');
+    $('quickDist').setAttribute('aria-label',data.map((v,i)=>`${['0枚','1枚','2枚','3枚以上'][i]}: ${toPct(v)}`).join('、'));
+    data.forEach((v,i)=>$('leg'+i).textContent=toPct(v,1));
+    const decks=[...new Set([40,41,42,43,44,45,50,55,60,N])].sort((a,b)=>a-b);
+    $('quickTable').innerHTML=decks.map(n=>`<tr class="${n===N?'selected-row':''}"><td>${n}枚${n===N?' ●':''}</td>${[1,2,3].map(k=>`<td>${toPct(1-none(n,k,h))}</td>`).join('')}</tr>`).join('');
+  }
+  function renderChart(rows,best) {
+    const w=620,h=235,pl=55,pr=22,pt=17,pb=32;
+    const values=rows.map(r=>r.score*100);const min=Math.min(...values),max=Math.max(...values);
+    const diff=max-min;const pad=Math.max(.12,diff*.22);
+    const lo=Math.max(0,min-pad),hi=Math.min(100,max+pad),yr=Math.max(hi-lo,.00001);
+    const xpos=i=>pl+(w-pl-pr)*i/(rows.length-1);
+    const ypos=v=>pt+(h-pt-pb)*(hi-v)/yr;
+    const pairs=values.map((v,i)=>[xpos(i),ypos(v)]);
+    const line=pairs.map(([x,y],i)=>`${i?'L':'M'}${x.toFixed(2)},${y.toFixed(2)}`).join(' ');
+    const area=line+` L${xpos(rows.length-1)},${h-pb} L${xpos(0)},${h-pb} Z`;
+    const grid=[0,1,2,3,4].map(i=>{const v=lo+(hi-lo)*i/4,y=ypos(v);return `<line x1="${pl}" y1="${y}" x2="${w-pr}" y2="${y}" stroke="#e5edf4"/><text x="${pl-9}" y="${y+4}" fill="#778aa0" font-size="11" text-anchor="end">${v.toFixed(1)}%</text>`}).join('');
+    const gap=rows.length<=8?1:rows.length<=12?2:5;
+    const labels=rows.map((r,i)=>(i===0||i===rows.length-1||i%gap===0)?`<text x="${xpos(i)}" y="${h-10}" text-anchor="middle" fill="#748298" font-size="11">${r.N}</text>`:'').join('');
+    const circles=rows.map((r,i)=>`<circle cx="${xpos(i)}" cy="${ypos(r.score*100)}" r="${r.N===best.N?6:3.7}" fill="${r.N===best.N?'#147b70':'#18a997'}" stroke="#fff" stroke-width="2"><title>${r.N}枚: ${toPct(r.score)}</title></circle>`).join('');
+    $('optChart').innerHTML=`<svg viewBox="0 0 ${w} ${h}" role="presentation" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="scoreFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1bbba9" stop-opacity=".25"/><stop offset="1" stop-color="#1bbba9" stop-opacity="0"/></linearGradient></defs>${grid}<path d="${area}" fill="url(#scoreFill)"/><path d="${line}" stroke="#13a995" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>${circles}${labels}</svg>`;
+    $('optChart').setAttribute('aria-label',`40〜${state.omax}枚の評価スコアのグラフ。最適は${best.N}枚、評価スコア${toPct(best.score)}。表にも詳細を表示。`);
+    $('optChartRange').textContent=`40〜${state.omax}枚`; 
+  }
+  function renderOpt() {
+    const {os:S,ob:B,ophase:phase,omax:max,or:residual}=state;
+    const rows=[];
+    for(let N=40;N<=max;N++)rows.push({N,...weightedMetrics(N,S,B,phase,residual/100)});
+    const baseline=rows[0];
+    // 同点（誤差1e-12以内）では、余計なカードを増やさず少ない枚数を選択。
+    const best=rows.reduce((prev,r)=>r.score>prev.score+1e-12?r:prev,rows[0]);
+    const diff=best.score-baseline.score;
+    $('optBest').innerHTML=best.N+'<span>枚</span>';
+    $('optScore').textContent=toPct(best.score);
+    $('optBaseline').textContent=toPct(baseline.score);
+    $('optScoreDelta').textContent=`40枚比 ${toPt(diff)}`;
+    $('optSummary').textContent=`初動${S}枚 / 事故${B}枚 / 40枚比 ${toPt(diff)}`;
+    const nuance=$('optNuance');
+    if(diff<.00005)nuance.textContent=best.N===40?'40枚との差はほぼありません。この条件では40枚構築を基準にするのが自然です。':`数値上は${best.N}枚が最大ですが、40枚との差は${toPt(diff)}と極小です。実用上は40枚構築を基準にできます。`;
+    else if(diff<.002)nuance.textContent=`数値上は${best.N}枚が最大ですが、40枚との差は${toPt(diff)}とわずかです。追加カード自体の価値も重視してください。`;
+    else nuance.textContent=`この評価基準では${best.N}枚が有利です。ただし、追加するカードが初動や展開に与える影響は計算に含まれません。`;
+    $('optTable').innerHTML=rows.map(r=>`<tr class="${r.N===best.N?'best-row':r.N===40?'selected-row':''}"><td>${r.N}枚${r.N===best.N?' ★':''}</td><td>${toPct(r.start)}</td><td>${toPct(r.brick)}</td><td>${toPct(r.clean)}</td><td>${r.N===best.N?'<strong>':''}${toPct(r.score)}${r.N===best.N?'</strong>':''}</td><td>${toPt(r.score-baseline.score)}</td></tr>`).join('');
+    renderChart(rows,best);
+  }
+  function render(){renderQuick();renderOpt();}
+  let toastTimer;
+  function toast(message){const el=$('toast');el.textContent=message;el.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),3300);}
+  function shareUrl() {
+    const url=new URL(location.href);
+    const p=url.searchParams;
+    p.set('tab',state.tab);
+    for(const [key,val] of Object.entries(state))if(key!=='tab')p.set(key,String(val));
+    url.hash='';return url.toString();
+  }
+  async function copyLink(){
+    if(location.protocol==='file:'){toast('設定URLの共有は、GitHub Pagesに公開してから利用できます。');return;}
+    const val=shareUrl();
+    try{
+      if(navigator.clipboard&&window.isSecureContext)await navigator.clipboard.writeText(val);
+      else {
+        const t=document.createElement('textarea');t.value=val;t.style.position='fixed';t.style.left='-9999px';document.body.append(t);t.select();const ok=document.execCommand('copy');t.remove();if(!ok)throw new Error('copy failed');
+      }
+      toast('現在の設定を含むURLをコピーしました。');
+    }catch(e){window.prompt('このURLをコピーしてください。',val);}
+  }
+  $('shareButton').addEventListener('click',copyLink);
+  function loadUrl(){
+    const p=new URLSearchParams(location.search);
+    const number=(key,min,max)=>{if(!p.has(key))return;const v=p.get(key);if(v===null||v.trim()===''||!Number.isFinite(Number(v)))return;state[key]=clamp(Math.round(Number(v)),min,max);};
+    number('qd',40,60);number('qk',1,30);number('qh',1,15);
+    number('os',1,30);number('ob',1,6);number('or',0,100);
+    if(['5','6','custom'].includes(p.get('qphase')))state.qphase=p.get('qphase');
+    if(['5','6','avg'].includes(p.get('ophase')))state.ophase=p.get('ophase');
+    if(['45','50','60'].includes(p.get('omax')))state.omax=Number(p.get('omax'));
+    for(const [id,key] of [['quickDeck','qd'],['quickTarget','qk'],['quickDraw','qh'],['optStarter','os'],['optBrick','ob'],['optResidual','or']]){
+      $(id).value=state[key];$(id+'Num').value=state[key];
+    }
+    syncSegments('quickPhase','qphase');syncSegments('optPhase','ophase');syncSegments('optMax','omax');
+    $('customDrawWrap').hidden=state.qphase!=='custom';
+    selectTab(p.get('tab'));
+  }
+  // テストと再利用のため、計算関数を読み取り専用APIとして公開。
+  window.DeckOdds=Object.freeze({none,exactly,metrics,weightedMetrics});
+  loadUrl();
+})();
+</script>
+</body>
+</html>
